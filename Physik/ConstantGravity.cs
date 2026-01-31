@@ -2,11 +2,9 @@ using System.Numerics;
 
 namespace Physik;
 
-public class ConstantGravity : IPhysicsForce
+public class ConstantGravity(Vector3 gravity) : IPhysicsForce
 {
-    public Vector3 GravityVector { get; set; }
-
-    public ConstantGravity(Vector3 gravity) => GravityVector = gravity;
+    private Vector3 GravityVector { get; set; } = gravity;
 
     public void Apply(PhysicsBox body, float deltaTime)
     {
