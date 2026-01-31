@@ -11,6 +11,9 @@ public class PhysicsEngine
         get => field;
     } = [];
 
+    public void AddBody(PhysicsBox body) => _bodies.Add(body);
+    public void RemoveBody(PhysicsBox body) => _bodies.Remove(body);
+    
     public void Update(float deltaTime)
     {
         foreach (var body in _bodies)
@@ -67,15 +70,20 @@ public class PhysicsEngine
 
     private static void CalculateAxis(float vel, float min1, float max1, float min2, float max2, out float entry, out float exit)
     {
-        if (vel > 0) {
-            entry = (min2 - max1) / vel;
-            exit = (max2 - min1) / vel;
-        } else if (vel < 0) {
-            entry = (max2 - min1) / vel;
-            exit = (min2 - max1) / vel;
-        } else {
-            entry = float.NegativeInfinity;
-            exit = float.PositiveInfinity;
+        switch (vel)
+        {
+            case > 0:
+                entry = (min2 - max1) / vel;
+                exit = (max2 - min1) / vel;
+                break;
+            case < 0:
+                entry = (max2 - min1) / vel;
+                exit = (min2 - max1) / vel;
+                break;
+            default:
+                entry = float.NegativeInfinity;
+                exit = float.PositiveInfinity;
+                break;
         }
     }
 
