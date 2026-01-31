@@ -17,11 +17,15 @@ public class PhysicsEngine
         {
             if (body.IsStatic) continue;
 
+            // 1. Alle externen Kräfte anwenden (Schwerkraft, Wind, etc.)
+            // Hier wird jetzt automatisch die WindForce-Klasse genutzt, 
+            // wenn du sie zur Liste hinzugefügt hast.
             foreach (var force in GlobalForces)
             {
                 force.Apply(body, deltaTime);
             }
 
+            // 2. Kollisionsprüfung gegen alle anderen Objekte
             foreach (var obstacle in _bodies)
             {
                 if (body == obstacle) continue;
@@ -33,7 +37,8 @@ public class PhysicsEngine
                     ResolveCollision(body, normal, hitTime, deltaTime);
                 }
             }
-            
+        
+            // 3. Die endgültige Position basierend auf der (geänderten) Geschwindigkeit berechnen
             body.Position += body.Velocity * deltaTime;
         }
     }
