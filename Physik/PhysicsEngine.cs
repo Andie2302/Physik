@@ -4,8 +4,12 @@ namespace Physik;
 
 public class PhysicsEngine
 {
-    private List<PhysicsBox> _bodies = new();
-    public List<IPhysicsForce> GlobalForces { get; } = new();
+    private readonly List<PhysicsBox> _bodies = [];
+
+    public List<IPhysicsForce> GlobalForces
+    {
+        get => field;
+    } = [];
 
     public void Update(float deltaTime)
     {
@@ -22,7 +26,7 @@ public class PhysicsEngine
             {
                 if (body == obstacle) continue;
 
-                float hitTime = SweptAABB(body, obstacle, out Vector3 normal, deltaTime);
+                var hitTime = SweptAabb(body, obstacle, out var normal, deltaTime);
 
                 if (hitTime < 1.0f) 
                 {
@@ -34,10 +38,10 @@ public class PhysicsEngine
         }
     }
 
-    private float SweptAABB(PhysicsBox b1, PhysicsBox b2, out Vector3 normal, float deltaTime)
+    private static float SweptAabb(PhysicsBox b1, PhysicsBox b2, out Vector3 normal, float deltaTime)
     {
         normal = Vector3.Zero;
-        Vector3 velocityFrame = b1.Velocity * deltaTime;
+        var velocityFrame = b1.Velocity * deltaTime;
 
         Vector3 entry, exit;
 
@@ -45,8 +49,8 @@ public class PhysicsEngine
         CalculateAxis(velocityFrame.Y, b1.Min.Y, b1.Max.Y, b2.Min.Y, b2.Max.Y, out entry.Y, out exit.Y);
         CalculateAxis(velocityFrame.Z, b1.Min.Z, b1.Max.Z, b2.Min.Z, b2.Max.Z, out entry.Z, out exit.Z);
 
-        float entryTime = Math.Max(entry.X, Math.Max(entry.Y, entry.Z));
-        float exitTime = Math.Min(exit.X, Math.Min(exit.Y, exit.Z));
+        var entryTime = Math.Max(entry.X, Math.Max(entry.Y, entry.Z));
+        var exitTime = Math.Min(exit.X, Math.Min(exit.Y, exit.Z));
 
         if (entryTime > exitTime || (entry.X < 0.0f && entry.Y < 0.0f && entry.Z < 0.0f) || entryTime > 1.0f)
             return 1.0f;
@@ -61,7 +65,7 @@ public class PhysicsEngine
         return entryTime;
     }
 
-    private void CalculateAxis(float vel, float min1, float max1, float min2, float max2, out float entry, out float exit)
+    private static void CalculateAxis(float vel, float min1, float max1, float min2, float max2, out float entry, out float exit)
     {
         if (vel > 0) {
             entry = (min2 - max1) / vel;
@@ -75,7 +79,7 @@ public class PhysicsEngine
         }
     }
 
-    private void ResolveCollision(PhysicsBox body, Vector3 normal, float hitTime, float deltaTime)
+    private static void ResolveCollision(PhysicsBox body, Vector3 normal, float hitTime, float deltaTime)
     {
         body.Position += body.Velocity * deltaTime * (hitTime - 0.001f);
 
