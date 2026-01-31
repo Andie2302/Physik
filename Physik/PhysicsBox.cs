@@ -2,7 +2,7 @@
 
 namespace Physik;
 
-public class PhysicsBox
+public abstract class PhysicsBox
 {
     public Vector3 Position; 
     public Vector3 Size;
