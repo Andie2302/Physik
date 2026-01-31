@@ -6,26 +6,27 @@ public class PhysicsEngine
 {
     private readonly List<PhysicsBox> _bodies = [];
 
+    // Hier werden alle Kräfte (Gravity, Wind, etc.) gesammelt
     public List<IPhysicsForce> GlobalForces { get; } = [];
 
     public void AddBody(PhysicsBox body) => _bodies.Add(body);
     public void RemoveBody(PhysicsBox body) => _bodies.Remove(body);
-    
+
     public void Update(float deltaTime)
     {
         foreach (var body in _bodies)
         {
             if (body.IsStatic) continue;
 
-            // 1. Alle externen Kräfte anwenden (Schwerkraft, Wind, etc.)
-            // Hier wird jetzt automatisch die WindForce-Klasse genutzt, 
-            // wenn du sie zur Liste hinzugefügt hast.
+            // 1. Alle Kräfte anwenden
+            // Die Engine muss nicht wissen, was "Wind" ist. 
+            // Sie ruft einfach force.Apply() auf.
             foreach (var force in GlobalForces)
             {
                 force.Apply(body, deltaTime);
             }
 
-            // 2. Kollisionsprüfung gegen alle anderen Objekte
+            // 2. Kollisionen prüfen
             foreach (var obstacle in _bodies)
             {
                 if (body == obstacle) continue;
@@ -37,11 +38,13 @@ public class PhysicsEngine
                     ResolveCollision(body, normal, hitTime, deltaTime);
                 }
             }
-        
-            // 3. Die endgültige Position basierend auf der (geänderten) Geschwindigkeit berechnen
+            
+            // 3. Position aktualisieren
             body.Position += body.Velocity * deltaTime;
         }
     }
+
+    // --- Ab hier bleibt alles wie vorher (SweptAABB Logik) ---
 
     private static float SweptAabb(PhysicsBox b1, PhysicsBox b2, out Vector3 normal, float deltaTime)
     {
@@ -91,27 +94,11 @@ public class PhysicsEngine
 
     private static void ResolveCollision(PhysicsBox body, Vector3 normal, float hitTime, float deltaTime)
     {
+        // Puffer gegen Floating-Point-Fehler
         body.Position += body.Velocity * deltaTime * (hitTime - 0.001f);
 
         if (Math.Abs(normal.X) > 0) body.Velocity.X = 0;
         if (Math.Abs(normal.Y) > 0) body.Velocity.Y = 0;
         if (Math.Abs(normal.Z) > 0) body.Velocity.Z = 0;
-    }
-    
-    public void Apply(PhysicsBox body, float deltaTime)
-    {
-        // 1. Relative Geschwindigkeit (Windgeschwindigkeit - Objektgeschwindigkeit)
-        Vector3 relativeWind = _globalWindVelocity - body.Velocity;
-        float speedSq = relativeWind.LengthSquared();
-        if (speedSq <= 0) return;
-
-        // 2. Vereinfachung: Wir nehmen die Fläche, die der Hauptwindrichtung am nächsten ist
-        float effectiveArea = CalculateProjectedArea(body, Vector3.Normalize(relativeWind));
-
-        // 3. F = 0.5 * Luftdichte * v² * Area * cw
-        float forceMag = 0.5f * 1.225f * speedSq * effectiveArea * body.DragCoefficient;
-        Vector3 force = Vector3.Normalize(relativeWind) * forceMag;
-
-        body.Velocity += (force * body.InverseMass) * deltaTime;
     }
 }
