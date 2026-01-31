@@ -43,8 +43,7 @@ for (var i = 0; i < 120; i++)
     // Nur jeden 5. Frame ausgeben, damit die Konsole lesbar bleibt
     if (i % 5 == 0) 
     {
-        Console.WriteLine($"{totalTime:F2}s | Y: {player.Position.Y:F2}m | vY: {player.Velocity.Y:F2}");
-    }
+        Console.WriteLine($"{totalTime:F2}s | X: {player.Position.X:F2}m | Y: {player.Position.Y:F2}m | vX: {player.Velocity.X:F2}| vY: {player.Velocity.Y:F2}");    }
 
     // Abbruchbedingung: Wenn der Spieler am Boden liegt
     if (player.Position.Y <= 1.01f && Math.Abs(player.Velocity.Y) < 0.1f)
