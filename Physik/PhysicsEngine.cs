@@ -6,10 +6,7 @@ public class PhysicsEngine
 {
     private readonly List<PhysicsBox> _bodies = [];
 
-    public List<IPhysicsForce> GlobalForces
-    {
-        get => field;
-    } = [];
+    public List<IPhysicsForce> GlobalForces { get; } = [];
 
     public void AddBody(PhysicsBox body) => _bodies.Add(body);
     public void RemoveBody(PhysicsBox body) => _bodies.Remove(body);
