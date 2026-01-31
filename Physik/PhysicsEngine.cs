@@ -95,4 +95,21 @@ public class PhysicsEngine
         if (Math.Abs(normal.Y) > 0) body.Velocity.Y = 0;
         if (Math.Abs(normal.Z) > 0) body.Velocity.Z = 0;
     }
+    
+    public void Apply(PhysicsBox body, float deltaTime)
+    {
+        // 1. Relative Geschwindigkeit (Windgeschwindigkeit - Objektgeschwindigkeit)
+        Vector3 relativeWind = _globalWindVelocity - body.Velocity;
+        float speedSq = relativeWind.LengthSquared();
+        if (speedSq <= 0) return;
+
+        // 2. Vereinfachung: Wir nehmen die Fläche, die der Hauptwindrichtung am nächsten ist
+        float effectiveArea = CalculateProjectedArea(body, Vector3.Normalize(relativeWind));
+
+        // 3. F = 0.5 * Luftdichte * v² * Area * cw
+        float forceMag = 0.5f * 1.225f * speedSq * effectiveArea * body.DragCoefficient;
+        Vector3 force = Vector3.Normalize(relativeWind) * forceMag;
+
+        body.Velocity += (force * body.InverseMass) * deltaTime;
+    }
 }
