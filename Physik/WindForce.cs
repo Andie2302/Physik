@@ -26,3 +26,21 @@ public class WindForce(Vector3 windVelocity, float airDensity = 1.225f) : IPhysi
         body.Velocity += (force * body.InverseMass) * deltaTime;
     }
 }
+
+public class DynamicBox : PhysicsBox 
+{ 
+    public DynamicBox() 
+    {
+        IsStatic = false; // Erzwinge: Das Ding bewegt sich!
+        Mass = 1.0f;      // Standardmasse setzen
+    }
+}
+
+public class StaticBox : PhysicsBox 
+{ 
+    public StaticBox() 
+    {
+        IsStatic = true; // Erzwinge: Das Ding bewegt sich NIE!
+        // Masse ist bei Static egal, da InverseMass dann eh 0 ist
+    }
+}
