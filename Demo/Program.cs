@@ -6,53 +6,28 @@ using Physik;
 
 Console.WriteLine("Hello, World!");
 
-
-// 1. Setup: Welt und Engine initialisieren
+// ... Engine Setup ...
 var engine = new PhysicsEngine();
 
-// 2. Kräfte hinzufügen (Schwerkraft)
-var gravity = new ConstantGravity(new Vector3(0, -9.81f, 0));
-engine.GlobalForces.Add(gravity);
+// 1. Schwerkraft (wirkt immer nach unten)
+engine.GlobalForces.Add(new ConstantGravity(new Vector3(0, -9.81f, 0)));
 
-// 3. Den Boden erstellen (Statisch)
-var floor = new StaticBox 
-{ 
-    Position = new Vector3(0, 0, 0), 
-    Size = new Vector3(10, 1, 10) 
-};
-engine.AddBody(floor);
+// 2. Ein heftiger Sturm von links nach rechts (X-Richtung)
+// Windgeschwindigkeit 20 m/s ist schon ein ordentlicher Sturm!
+engine.GlobalForces.Add(new WindForce(new Vector3(20, 0, 0)));
 
-// 4. Den Spieler erstellen (Beweglich)
-var player = new DynamicBox 
-{ 
-    Position = new Vector3(0, 10, 0), // Startet in 10m Höhe
-    Size = new Vector3(1, 1, 1) 
+// 3. Der Spieler (DynamicBox)
+var player = new DynamicBox { 
+    Position = new Vector3(0, 50, 0), // Startet weit oben
+    Size = new Vector3(1, 2, 1),      // Eine Person ist höher als breit
+    Mass = 80.0f                      // 80kg
 };
 engine.AddBody(player);
 
-Console.WriteLine("Simulation startet... Spieler fällt aus 10m Höhe.");
-Console.WriteLine("Zeit | Position Y | Geschwindigkeit Y");
-Console.WriteLine("-------------------------------------");
+// 4. Ein Hindernis (StaticBox) - weiter rechts
+engine.AddBody(new StaticBox { 
+    Position = new Vector3(15, 0, 0), 
+    Size = new Vector3(5, 10, 5) 
+});
 
-// 5. Simulations-Schleife (2 Sekunden in 1/60s Schritten)
-float totalTime = 0;
-float deltaTime = 1f / 60f;
-
-for (int i = 0; i < 120; i++)
-{
-    engine.Update(deltaTime);
-    totalTime += deltaTime;
-
-    if (i % 5 == 0) // Nur jeden 5. Frame ausgeben
-    {
-        Console.WriteLine($"{totalTime:F2}s | {player.Position.Y:F2}m | {player.Velocity.Y:F2} m/s");
-    }
-
-    if (player.Position.Y <= 1.01f && player.Velocity.Y == 0)
-    {
-        Console.WriteLine("--- Aufprall erkannt und gelöst! ---");
-        break;
-    }
-}
-
-// Hilfsklassen, da PhysicsBox abstract ist
+// Simulation für ein paar Sekunden laufen lassen und Positionen ausgeben...
