@@ -1,33 +1,55 @@
-﻿// See https://aka.ms/new-console-template for more information
-
-
-using System.Numerics;
+﻿using System.Numerics;
 using Physik;
 
-Console.WriteLine("Hello, World!");
-
-// ... Engine Setup ...
+// 1. Setup: Welt und Engine initialisieren
 var engine = new PhysicsEngine();
 
-// 1. Schwerkraft (wirkt immer nach unten)
+// 2. Kräfte hinzufügen
+// Schwerkraft
 engine.GlobalForces.Add(new ConstantGravity(new Vector3(0, -9.81f, 0)));
+// Wind (optional, zum Testen)
+engine.GlobalForces.Add(new WindForce(new Vector3(10, 0, 0))); 
 
-// 2. Ein heftiger Sturm von links nach rechts (X-Richtung)
-// Windgeschwindigkeit 20 m/s ist schon ein ordentlicher Sturm!
-engine.GlobalForces.Add(new WindForce(new Vector3(20, 0, 0)));
+// 3. Den Boden erstellen (Statisch)
+var floor = new StaticBox 
+{ 
+    Position = new Vector3(0, 0, 0), 
+    Size = new Vector3(10, 1, 10) 
+};
+engine.AddBody(floor);
 
-// 3. Der Spieler (DynamicBox)
-var player = new DynamicBox { 
-    Position = new Vector3(0, 50, 0), // Startet weit oben
-    Size = new Vector3(1, 2, 1),      // Eine Person ist höher als breit
-    Mass = 80.0f                      // 80kg
+// 4. Den Spieler erstellen (Beweglich)
+var player = new DynamicBox 
+{ 
+    Position = new Vector3(0, 10, 0), // Startet in 10m Höhe
+    Size = new Vector3(1, 2, 1),      // Höhe 2m, Breite 1m (gut für Wind-Test)
+    Mass = 80f
 };
 engine.AddBody(player);
 
-// 4. Ein Hindernis (StaticBox) - weiter rechts
-engine.AddBody(new StaticBox { 
-    Position = new Vector3(15, 0, 0), 
-    Size = new Vector3(5, 10, 5) 
-});
+Console.WriteLine("Simulation startet... Spieler fällt aus 10m Höhe.");
+Console.WriteLine("Zeit | Position Y | Geschwindigkeit Y");
+Console.WriteLine("-------------------------------------");
 
-// Simulation für ein paar Sekunden laufen lassen und Positionen ausgeben...
+// 5. Simulations-Schleife (2 Sekunden in 1/60s Schritten)
+float totalTime = 0;
+const float deltaTime = 1f / 60f;
+
+for (var i = 0; i < 120; i++)
+{
+    engine.Update(deltaTime);
+    totalTime += deltaTime;
+
+    // Nur jeden 5. Frame ausgeben, damit die Konsole lesbar bleibt
+    if (i % 5 == 0) 
+    {
+        Console.WriteLine($"{totalTime:F2}s | Y: {player.Position.Y:F2}m | vY: {player.Velocity.Y:F2}");
+    }
+
+    // Abbruchbedingung: Wenn der Spieler am Boden liegt
+    if (player.Position.Y <= 1.01f && Math.Abs(player.Velocity.Y) < 0.1f)
+    {
+        Console.WriteLine("--- Aufprall erkannt und gelöst! ---");
+        break;
+    }
+}
