@@ -56,5 +56,3 @@ for (int i = 0; i < 120; i++)
 }
 
 // Hilfsklassen, da PhysicsBox abstract ist
-public class DynamicBox : PhysicsBox { public DynamicBox() => IsStatic = false; }
-public class StaticBox : PhysicsBox { public StaticBox() => IsStatic = true; }
